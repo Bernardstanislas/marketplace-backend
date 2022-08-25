@@ -1,0 +1,53 @@
+# The name of this app. Must be unique within a project.
+name: app
+
+# The runtime the application uses. The 'type' key defines the base container
+# image that will be used to run the application. There is a separate base
+# container image for each primary language for the application,
+# in multiple versions. Check the PHP documentation
+# (https://docs.platform.sh/languages/php.html#supported-versions)
+# to find the supported versions for the 'php' type.
+type: golang:1.18
+
+# The size of the persistent disk of the application (in MB).
+disk: 1024
+
+# The relationships of the application with services or other applications.
+#
+# The left-hand side is the name of the relationship as it will be exposed
+# to the application in the PLATFORM_RELATIONSHIPS variable. The right-hand
+# side is in the form '<service name>:<endpoint name>'.
+relationships:
+    postgresdatabase: "dbpostgres:postgresql"
+
+hooks:
+    build: |
+        set -e
+        export VERSION="3.24.1"
+        wget https://github.com/Kitware/CMake/releases/download/v$VERSION/cmake-$VERSION-linux-x86_64.tar.gz
+        tar xzf cmake-$VERSION-linux-x86_64.tar.gz
+        export PATH=$PATH:/$PWD/cmake-$VERSION-linux-x86_64/bin
+        curl https://sh.rustup.rs > rustup.sh
+        sh rustup.sh -y --default-toolchain nightly
+        rm rustup.sh
+        . "$HOME/.cargo/env"
+        cargo build --release
+        rm -rf marketplace-core
+        rm -rf marketplace-domain
+        rm -rf marketplace-indexer
+        rm -rf marketplace-wrappers
+        mv target/release/marketplace-core .
+        rm -rf target
+
+web:
+    upstream:
+        socket_family: tcp
+        protocol: http
+
+    commands:
+        start: |
+            ROCKET_PORT=$PORT ./marketplace-core
+
+variables:
+    env:
+        DATABASE_URL: "postgres://main:main@postgresdatabase.internal:5432/main?connect_timeout=30"
