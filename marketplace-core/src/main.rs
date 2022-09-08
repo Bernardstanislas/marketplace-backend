@@ -108,6 +108,7 @@ async fn main() {
 	.mount("/swagger", make_swagger_ui(&routes::get_docs()))
 	.launch();
 
+	info!("Everything is awesome!");
 	let (rocket_result,) = tokio::join!(rocket_handler);
 	let _ = rocket_result.unwrap();
 
