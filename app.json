@@ -1,0 +1,27 @@
+{
+  "name": "OnlyDust Marketplace",
+  "description": "Paid contribution marketplace",
+  "website": "https://app.onlydust.xyz",
+  "repository": "https://github.com/onlydustxyz/marketplace-backend",
+  "success_url": "/swagger",
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "standard-1x"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql",
+      "options": {
+        "version": "14"
+      }
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/hone/heroku-buildpack-rust"
+    }
+  ]
+}
+
